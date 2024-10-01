@@ -26,13 +26,13 @@ question = '''Extract the text from the provided image and return only plain tex
               If there is no text in the image, simply return '0' but do not miss any word in the image.'''
 
 # Example images and answers for pre-trained data
-image1 = Image.open('/content/train1.jpg').convert('RGB')
+image1 = Image.open('train1.jpg').convert('RGB')
 answer1 = '''In many cases , their homes know little of 
             their place of work and their associates at the office or works wonder what they they are possibly like in the surroundings of their homes . It is easy , desperately easy , to lead a 'double' life without ever deliberately 
             planning to do so or in fact being conscious of what is going on . It is easier to live life in 
             compartments but over the years it builds up, and to do inevitably builds up tensions which need to be handled correctly. 
             Name:'''
-image2 = Image.open('/content/train2.jpg').convert('RGB')
+image2 = Image.open('train2.jpg').convert('RGB')
 answer2 = '''A MOVE to stop Mr. Gaitskell from nominating any more Labour life Peers is to be made at a meeting of Labour MPs tomorrow.  
             Mr. Michael Foot has put down a resolution on the subject and he is to be backed by Mr. Will Griffiths, MP for Manchester Exchange.'''
 # image_test = Image.open('test.jpg').convert('RGB')
