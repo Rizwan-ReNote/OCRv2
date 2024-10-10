@@ -188,12 +188,12 @@ model = AutoModel.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_cod
 tokenizer = AutoTokenizer.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
  
 # Sample question
-question = '''Extract the text from the provided image and return only plain text content. 
-              Ensure that no additional formatting, metadata, or fields like title, subtitles, or table headers are included in the response. 
-              Provide only the actual text from the image without explaining about the image or text in the response. 
-              Do not autocorrect the text and do not insert extra characters to the words and do not apply contraction to the words.   
-              Return the extracted text exactly as it appears, without any additional explanation.  
-              If there is no text in the image, simply return '0' but do not miss any word in the image.'''
+question = '''Extract the raw text from the provided image and return only the plain text exactly as it appears.
+Ensure no additional formatting, metadata, or extra fields like titles, subtitles, or table headers are included.
+Do not manipulate, correct, or change the text in any way—this includes avoiding spelling corrections, added characters, or contractions.
+
+Return the text exactly as it appears in the image, maintaining all original details without any modifications or explanations.
+If there is no text in the image, return '0.' Ensure that no words or characters from the image are missed in the extraction.'''
  
 # Initialize msgs for context learning
 msgs = [
