@@ -188,13 +188,12 @@ model = AutoModel.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_cod
 tokenizer = AutoTokenizer.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
  
 # Sample question
-question = '''Objective: Extract text exactly as it appears in the image without additional interpretation or modification.
-
-Do NOT autocorrect any words or sentences. Retain any spelling or grammatical errors exactly as they appear.
-Do NOT explain, summarize, or interpret the content of the image (no explanations about headers, body text, footers, etc.).
-Extract all text, including repeated words or sentences. Do not omit repeated content.
-Do NOT contract or shorten any words. Retain the full form of the text as it appears.
-If the image contains no text, return 0.'''
+question = '''Extract the text from the provided image and return only plain text content. 
+              Ensure that no additional formatting, metadata, or fields like title, subtitles, or table headers are included in the response. 
+              Provide only the actual text from the image without explaining about the image or text in the response. 
+              Do not autocorrect the text and do not insert extra characters to the words and do not apply contraction to the words.   
+              Return the extracted text exactly as it appears, without any additional explanation.  
+              If there is no text in the image, simply return '0' but do not miss any word in the image.'''
  
 # Initialize msgs for context learning
 msgs = [
@@ -203,7 +202,10 @@ msgs = [
     {'role': 'user', 'content': [Image.open('train2.jpeg').convert('RGB'), question]},
     {'role': 'assistant', 'content': '''Title : Donut OCR /nDonut (Document understanding /ntransformer) is one of the ways /nwe can exxtract into form /ndocs and we use them in /nvarious ways. /nIt is a newest method for /nprocesing & extracting information /nfrom documents. Unlike OCR engines, /nDonut utilizes an end-to-end /ntransformer model. /nIt comprises a vision encoder & /na text - decoder (BART) . /nHi, How you are doing ? /nIt is true ?'''},
     {'role': 'user', 'content': [Image.open('train3.jpg').convert('RGB'), question]},
-    {'role': 'assistant', 'content': '''Date: /nsmrt resuable Noetbok /nImagine a notebook that evloves /nwith your thouhgts , a smart /nreusable noetbook that harms /nthe powder of technologi to /nrevolutonze your writing /nxperience. Thi s remarkalbe tool /ncaptures the /ncaptures the esense of your /ncreativity , technology. /ntechnology , effortlessely.'''}
+    {'role': 'assistant', 'content': '''Date: /nsmrt resuable Noetbok /nImagine a notebook that evloves /nwith your thouhgts , a smart /nreusable noetbook that harms /nthe powder of technologi to /nrevolutonze your writing /nxperience. Thi s remarkalbe tool /ncaptures the /ncaptures the esense of your /ncreativity , technology. /ntechnology , effortlessely.'''},
+    {'role': 'user', 'content': [Image.open('train4.jpg').convert('RGB'), question]},
+    {'role': 'assistant', 'content': '''Munday , Fraday , Tusedai , /nwednsedae , satuday /nGood Mrning Pencel /nKatlon studio is gve fre. /ntral for one manth. /nI wil tkae live Today /nbecase I am nat Feling wel'''}
+
 ]
  
 # Define route for image OCR extraction with context learning
@@ -231,7 +233,7 @@ async def extract_text(image: UploadFile = File(...)):
         msgs.append({'role': 'assistant', 'content': answer})
  
         # Return the result as JSON
-        return JSONResponse(content={"extracted_text": answer})
+        return JSONResponse(content={answer})
  
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the image: {str(e)}")
