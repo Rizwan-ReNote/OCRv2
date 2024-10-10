@@ -233,7 +233,7 @@ async def extract_text(image: UploadFile = File(...)):
         msgs.append({'role': 'assistant', 'content': answer})
  
         # Return the result as JSON
-        return JSONResponse(content={answer})
+        return JSONResponse(content={"extracted_text": answer})
  
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the image: {str(e)}")
