@@ -205,6 +205,7 @@ msgs = [
     {'role': 'assistant', 'content': '''Date: smart reusable Notebook. Imagine a notebook that evolves with your thoughts, a smart reusable notebook that harnesses the power of technology to revolutionize your writing experience. This remarkable tool captures the essence of your creativity effortlessly.'''}
 ]
 
+
 # Define route for image OCR extraction
 @app.post("/extract-text")
 async def extract_text(image: UploadFile = File(...)):
