@@ -179,12 +179,30 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from io import BytesIO
 import uvicorn
+
+def clear_cuda_cache():
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.synchronize()
+        print("CUDA cache cleared")
  
 # Initialize FastAPI app
 app = FastAPI()
  
+torch.set_grad_enabled(False)
 # Load model and tokenizer
 model = AutoModel.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
+
+
+model = model.to(device='cuda')
+model.eval()  # Set the model to evaluation mode
+ 
+# Disable gradient computation for model parameters
+for param in model.parameters():
+    param.requires_grad = False
+    
+    
+    
 tokenizer = AutoTokenizer.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
  
 # Sample question
@@ -199,23 +217,25 @@ question = '''Extract the text from the provided image and return only plain tex
 msgs = [
     {'role': 'user', 'content': [Image.open('train1.jpeg').convert('RGB'), question]},
     {'role': 'assistant', 'content': '''Hi , How are you you ? /nI am fine fine , what /nabout you ? /nThis is a test image for /nOCR whcih is opticall /ncharacterrr recognition . /nIt looks cool to get the /ndigitalized and it is a /ngood thing that can be /ndone . /nNotes:'''},
-    {'role': 'user', 'content': [Image.open('train2.jpeg').convert('RGB'), question]},
-    {'role': 'assistant', 'content': '''Title : Donut OCR /nDonut (Document understanding /ntransformer) is one of the ways /nwe can exxtract into form /ndocs and we use them in /nvarious ways. /nIt is a newest method for /nprocesing & extracting information /nfrom documents. Unlike OCR engines, /nDonut utilizes an end-to-end /ntransformer model. /nIt comprises a vision encoder & /na text - decoder (BART) . /nHi, How you are doing ? /nIt is true ?'''},
+    # {'role': 'user', 'content': [Image.open('train2.jpeg').convert('RGB'), question]},
+    # {'role': 'assistant', 'content': '''Title : Donut OCR /nDonut (Document understanding /ntransformer) is one of the ways /nwe can exxtract into form /ndocs and we use them in /nvarious ways. /nIt is a newest method for /nprocesing & extracting information /nfrom documents. Unlike OCR engines, /nDonut utilizes an end-to-end /ntransformer model. /nIt comprises a vision encoder & /na text - decoder (BART) . /nHi, How you are doing ? /nIt is true ?'''},
     {'role': 'user', 'content': [Image.open('train3.jpg').convert('RGB'), question]},
     {'role': 'assistant', 'content': '''Date: /nsmrt resuable Noetbok /nImagine a notebook that evloves /nwith your thouhgts , a smart /nreusable noetbook that harms /nthe powder of technologi to /nrevolutonze your writing /nxperience. Thi s remarkalbe tool /ncaptures the /ncaptures the esense of your /ncreativity , technology. /ntechnology , effortlessely.'''},
-    {'role': 'user', 'content': [Image.open('train4.jpg').convert('RGB'), question]},
-    {'role': 'assistant', 'content': '''Munday , Fraday , Tusedai , /nwednsedae , satuday /nGood Mrning Pencel /nKatlon studio is gve fre. /ntral for one manth. /nI wil tkae live Today /nbecase I am nat Feling wel'''}
+    # {'role': 'user', 'content': [Image.open('train4.jpg').convert('RGB'), question]},
+    # {'role': 'assistant', 'content': '''Munday , Fraday , Tusedai , /nwednsedae , satuday /nGood Mrning Pencel /nKatlon studio is gve fre. /ntral for one manth. /nI wil tkae live Today /nbecase I am nat Feling wel'''}
 
 ]
  
 # Define route for image OCR extraction with context learning
-@app.post("/extract-text")
+@app.post("/OCR")
 async def extract_text(image: UploadFile = File(...)):
+    
     # Check file type
     if not image.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
  
     try:
+        clear_cuda_cache()
         # Load image from the uploaded file
         image_bytes = await image.read()
         img = Image.open(BytesIO(image_bytes)).convert('RGB')
@@ -231,11 +251,13 @@ async def extract_text(image: UploadFile = File(...)):
  
         # Append the assistant's response to the context (msgs)
         msgs.append({'role': 'assistant', 'content': answer})
+        clear_cuda_cache()
  
         # Return the result as JSON
-        return JSONResponse(content={"extracted_text": answer})
+        return JSONResponse(content={"OCR": answer})
  
     except Exception as e:
+        clear_cuda_cache()
         raise HTTPException(status_code=500, detail=f"Error processing the image: {str(e)}")
  
 # Run the FastAPI app with Uvicorn
