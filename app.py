@@ -178,6 +178,7 @@ from transformers import AutoModel, AutoTokenizer
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from io import BytesIO
+from PIL import ImageOps
 import uvicorn
 
 def clear_cuda_cache():
@@ -226,40 +227,65 @@ msgs = [
 
 ]
  
-# Define route for image OCR extraction with context learning
+def preprocess_image(image: Image.Image, target_size=(1344, 1344)):
+    """
+    Preprocess the image by resizing and padding it to the target size (1344x1344).
+    The aspect ratio of the original image is preserved and padding is added to make
+    it exactly 1344x1344 without cropping.
+    
+    Args:
+        image (PIL.Image.Image): The input image.
+        target_size (tuple): The target size (width, height) for the model.
+    
+    Returns:
+        PIL.Image.Image: The preprocessed image with padding.
+    """
+    # Resize the image while maintaining aspect ratio
+    image.thumbnail(target_size, Image.ANTIALIAS)
+    
+    # Calculate padding to match the target size
+    delta_width = target_size[0] - image.size[0]
+    delta_height = target_size[1] - image.size[1]
+    padding = (delta_width // 2, delta_height // 2, delta_width - delta_width // 2, delta_height - delta_height // 2)
+    
+    # Add padding to the image (fill with white color)
+    padded_image = ImageOps.expand(image, padding, fill=(255, 255, 255))  # Using white padding
+    
+    return padded_image
+
 @app.post("/OCR")
 async def extract_text(image: UploadFile = File(...)):
-    
     # Check file type
     if not image.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
- 
+
     try:
         clear_cuda_cache()
+
         # Load image from the uploaded file
         image_bytes = await image.read()
         img = Image.open(BytesIO(image_bytes)).convert('RGB')
+
+        # Preprocess the image to the required size (1344x1344) with padding
+        processed_img = preprocess_image(img, target_size=(1344, 1344))
+
         # Add the new image and question to the msgs for context learning
-        msgs.append({'role': 'user', 'content': [img, question]})
- 
+        msgs.append({'role': 'user', 'content': [processed_img, question]})
+
         # Get the model's response using the updated context
         answer = model.chat(
             image=None,
             msgs=msgs,
             tokenizer=tokenizer
         )
- 
+
         # Append the assistant's response to the context (msgs)
         msgs.append({'role': 'assistant', 'content': answer})
         clear_cuda_cache()
- 
+
         # Return the result as JSON
         return JSONResponse(content={"text": answer})
- 
+
     except Exception as e:
         clear_cuda_cache()
         raise HTTPException(status_code=500, detail=f"Error processing the image: {str(e)}")
- 
-# Run the FastAPI app with Uvicorn
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
