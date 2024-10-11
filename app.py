@@ -194,7 +194,7 @@ torch.set_grad_enabled(False)
 model = AutoModel.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
 
 
-model = model.to(device='cuda')
+# model = model.to(device='cuda')
 model.eval()  # Set the model to evaluation mode
  
 # Disable gradient computation for model parameters
