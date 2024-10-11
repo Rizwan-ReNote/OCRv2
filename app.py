@@ -254,7 +254,7 @@ async def extract_text(image: UploadFile = File(...)):
         clear_cuda_cache()
  
         # Return the result as JSON
-        return JSONResponse(content={"OCR": answer})
+        return JSONResponse(content={"text": answer})
  
     except Exception as e:
         clear_cuda_cache()
