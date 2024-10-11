@@ -241,7 +241,7 @@ def preprocess_image(image: Image.Image, target_size=(1344, 1344)):
         PIL.Image.Image: The preprocessed image with padding.
     """
     # Resize the image while maintaining aspect ratio
-    image.thumbnail(target_size, Image.ANTIALIAS)
+    image.thumbnail(target_size, Image.Resampling.LANCZOS)
     
     # Calculate padding to match the target size
     delta_width = target_size[0] - image.size[0]
