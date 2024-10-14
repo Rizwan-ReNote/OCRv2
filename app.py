@@ -486,15 +486,10 @@ torch.set_grad_enabled(False)
 model = AutoModel.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
 tokenizer = AutoTokenizer.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
 
-# Move model to GPU if available
-if torch.cuda.is_available():
-    model = model.to('cuda')
-
-model.eval()  # Set model to evaluation mode
+model.eval()  # Set model to evaluation mode (no need for .to('cuda') for bitsandbytes models)
 
 # Sample question for the model
 question = '''Extract the text from the provided image and return only plain text content. 
-              Dont add Title, Body, subtitle, Description.
               Ensure that no additional formatting, metadata, or fields like title, subtitles, or table headers are included in the response. 
               Provide only the actual text from the image without explaining about the image or text in the response. 
               Do not autocorrect the text and do not insert extra characters to the words and do not apply contraction to the words. 
@@ -545,9 +540,6 @@ async def extract_text(image: UploadFile = File(...)):
 
         # Mixed precision inference using AMP
         with torch.no_grad():
-            if torch.cuda.is_available():
-                model.cuda()
-
             with autocast():  # Mixed precision context
                 answer = model.chat(
                     image=None,
