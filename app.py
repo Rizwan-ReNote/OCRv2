@@ -506,15 +506,15 @@ async def read_image(image_file: UploadFile):
 # Function to preprocess the image using torchvision for efficiency
 from torchvision import transforms
 
-preprocess = transforms.Compose([
-    transforms.Resize(1344),  # Resize to 1344
-    transforms.CenterCrop(1344),  # Crop to the center
-    transforms.ToTensor(),  # Convert to tensor
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Normalize
-])
+# preprocess = transforms.Compose([
+#     transforms.Resize(1344),  # Resize to 1344
+#     transforms.CenterCrop(1344),  # Crop to the center
+#     transforms.ToTensor(),  # Convert to tensor
+#     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Normalize
+# ])
 
-def preprocess_image(image: Image.Image):
-    return preprocess(image).unsqueeze(0)  # Add batch dimension
+# def preprocess_image(image: Image.Image):
+#     return preprocess(image).unsqueeze(0)  # Add batch dimension
 
 @app.post("/OCR")
 async def extract_text(image: UploadFile = File(...)):
@@ -530,7 +530,7 @@ async def extract_text(image: UploadFile = File(...)):
         img = Image.open(BytesIO(image_bytes)).convert('RGB')
 
         # Preprocess the image
-        processed_img = preprocess_image(img)
+        processed_img = img
 
         # Move image to CPU memory if needed
         processed_img = processed_img.cpu()
