@@ -316,7 +316,7 @@ async def extract_text(image: UploadFile = File(...)):
         # Initialize context for each request to avoid cross-request contamination
         msgs.append({'role': 'user', 'content': [processed_img, question]})
         # msgs = [{'role': 'user', 'content': [processed_img, question]}]
-
+        clear_cuda_cache()
         # Detach the model's history or state (important for certain models)
         # Run inference using the model
         answer = model.chat(
