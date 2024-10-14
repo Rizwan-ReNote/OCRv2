@@ -495,19 +495,20 @@ question = '''Extract the text from the provided image and return only plain tex
               Do not autocorrect the text and do not insert extra characters to the words and do not apply contraction to the words. 
               Return the extracted text exactly as it appears, without any additional explanation. 
               If there is no text in the image, simply return '0' but do not miss any word in the image.
+              You would get penalized for generating Title, Subtitle and body.
               '''
               
-msgs = [
-    {'role': 'user', 'content': [Image.open('train1.jpeg').convert('RGB'), question]},
-    {'role': 'assistant', 'content': '''Hi , How are you you ? /nI am fine fine , what /nabout you ? /nThis is a test image for /nOCR whcih is opticall /ncharacterrr recognition . /nIt looks cool to get the /ndigitalized and it is a /ngood thing that can be /ndone . /nNotes:'''},
-    # {'role': 'user', 'content': [Image.open('train2.jpeg').convert('RGB'), question]},
-    # {'role': 'assistant', 'content': '''Title : Donut OCR /nDonut (Document understanding /ntransformer) is one of the ways /nwe can exxtract into form /ndocs and we use them in /nvarious ways. /nIt is a newest method for /nprocesing & extracting information /nfrom documents. Unlike OCR engines, /nDonut utilizes an end-to-end /ntransformer model. /nIt comprises a vision encoder & /na text - decoder (BART) . /nHi, How you are doing ? /nIt is true ?'''},
-    {'role': 'user', 'content': [Image.open('train3.jpg').convert('RGB'), question]},
-    {'role': 'assistant', 'content': '''Date: /nsmrt resuable Noetbok /nImagine a notebook that evloves /nwith your thouhgts , a smart /nreusable noetbook that harms /nthe powder of technologi to /nrevolutonze your writing /nxperience. Thi s remarkalbe tool /ncaptures the /ncaptures the esense of your /ncreativity , technology. /ntechnology , effortlessely.'''},
-    # {'role': 'user', 'content': [Image.open('train4.jpg').convert('RGB'), question]},
-    # {'role': 'assistant', 'content': '''Munday , Fraday , Tusedai , /nwednsedae , satuday /nGood Mrning Pencel /nKatlon studio is gve fre. /ntral for one manth. /nI wil tkae live Today /nbecase I am nat Feling wel'''}
+# msgs = [
+#     {'role': 'user', 'content': [Image.open('train1.jpeg').convert('RGB'), question]},
+#     {'role': 'assistant', 'content': '''Hi , How are you you ? /nI am fine fine , what /nabout you ? /nThis is a test image for /nOCR whcih is opticall /ncharacterrr recognition . /nIt looks cool to get the /ndigitalized and it is a /ngood thing that can be /ndone . /nNotes:'''},
+#     # {'role': 'user', 'content': [Image.open('train2.jpeg').convert('RGB'), question]},
+#     # {'role': 'assistant', 'content': '''Title : Donut OCR /nDonut (Document understanding /ntransformer) is one of the ways /nwe can exxtract into form /ndocs and we use them in /nvarious ways. /nIt is a newest method for /nprocesing & extracting information /nfrom documents. Unlike OCR engines, /nDonut utilizes an end-to-end /ntransformer model. /nIt comprises a vision encoder & /na text - decoder (BART) . /nHi, How you are doing ? /nIt is true ?'''},
+#     {'role': 'user', 'content': [Image.open('train3.jpg').convert('RGB'), question]},
+#     {'role': 'assistant', 'content': '''Date: /nsmrt resuable Noetbok /nImagine a notebook that evloves /nwith your thouhgts , a smart /nreusable noetbook that harms /nthe powder of technologi to /nrevolutonze your writing /nxperience. Thi s remarkalbe tool /ncaptures the /ncaptures the esense of your /ncreativity , technology. /ntechnology , effortlessely.'''},
+#     # {'role': 'user', 'content': [Image.open('train4.jpg').convert('RGB'), question]},
+#     # {'role': 'assistant', 'content': '''Munday , Fraday , Tusedai , /nwednsedae , satuday /nGood Mrning Pencel /nKatlon studio is gve fre. /ntral for one manth. /nI wil tkae live Today /nbecase I am nat Feling wel'''}
 
-]
+# ]
 
 # Preprocessing function to resize and pad the image
 def preprocess_image(image: Image.Image, target_size=(1344, 1344)):
@@ -545,8 +546,8 @@ async def extract_text(image: UploadFile = File(...)):
         processed_img = preprocess_image(img)
 
         # Prepare input message for model
-        # msgs = [{'role': 'user', 'content': [processed_img, question]}]
-        msgs.append({'role': 'user', 'content': [processed_img, question]})
+        msgs = [{'role': 'user', 'content': [processed_img, question]}]
+        # msgs.append({'role': 'user', 'content': [processed_img, question]})
 
         # Mixed precision inference using AMP
         with torch.no_grad():
