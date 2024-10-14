@@ -322,6 +322,7 @@ async def extract_text(image: UploadFile = File(...)):
             image=None,
             msgs=msgs,
             tokenizer=tokenizer,
+            temperature = 0.1,
         )
 
         # Clear CUDA cache and garbage collector after inference
