@@ -38,8 +38,6 @@ question = '''Extract the text from the provided image and return only plain tex
               Do not autocorrect the text and do not insert extra characters to the words and do not apply contraction to the words. 
               Return the extracted text exactly as it appears, without any additional explanation. 
               If there is no text in the image, simply return '0' but do not miss any word in the image.
-              You would get penalized for generating Title, Subtitle and body.
-              I dont need title , subtitle and body tags to be generated.
               '''
               
 msgs = [
