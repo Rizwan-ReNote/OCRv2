@@ -314,8 +314,8 @@ async def extract_text(image: UploadFile = File(...)):
         processed_img = preprocess_image(img, target_size=(1344, 1344))
 
         # Initialize context for each request to avoid cross-request contamination
-        # msgs.append({'role': 'user', 'content': [processed_img, question]})
-        msgs = [{'role': 'user', 'content': [processed_img, question]}]
+        msgs.append({'role': 'user', 'content': [processed_img, question]})
+        # msgs = [{'role': 'user', 'content': [processed_img, question]}]
 
         # Detach the model's history or state (important for certain models)
         # Run inference using the model
