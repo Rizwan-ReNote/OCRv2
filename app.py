@@ -500,8 +500,8 @@ question = '''Extract the text from the provided image and return only plain tex
               '''
               
 msgs = [
-    {'role': 'user', 'content': [Image.open('train1.jpeg').convert('RGB'), question]},
-    {'role': 'assistant', 'content': '''Hi , How are you you ? /nI am fine fine , what /nabout you ? /nThis is a test image for /nOCR whcih is opticall /ncharacterrr recognition . /nIt looks cool to get the /ndigitalized and it is a /ngood thing that can be /ndone . /nNotes:'''},
+    # {'role': 'user', 'content': [Image.open('train1.jpeg').convert('RGB'), question]},
+    # {'role': 'assistant', 'content': '''Hi , How are you you ? /nI am fine fine , what /nabout you ? /nThis is a test image for /nOCR whcih is opticall /ncharacterrr recognition . /nIt looks cool to get the /ndigitalized and it is a /ngood thing that can be /ndone . /nNotes:'''},
     # {'role': 'user', 'content': [Image.open('train2.jpeg').convert('RGB'), question]},
     # {'role': 'assistant', 'content': '''Title : Donut OCR /nDonut (Document understanding /ntransformer) is one of the ways /nwe can exxtract into form /ndocs and we use them in /nvarious ways. /nIt is a newest method for /nprocesing & extracting information /nfrom documents. Unlike OCR engines, /nDonut utilizes an end-to-end /ntransformer model. /nIt comprises a vision encoder & /na text - decoder (BART) . /nHi, How you are doing ? /nIt is true ?'''},
     {'role': 'user', 'content': [Image.open('train3.jpg').convert('RGB'), question]},
