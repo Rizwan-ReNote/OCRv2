@@ -99,7 +99,8 @@ async def extract_text(image: UploadFile = File(...)):
                 answer = model.chat(
                     image=None,
                     msgs=msgs,
-                    tokenizer=tokenizer
+                    tokenizer=tokenizer,
+                    temperature = 0.1
                 )
 
         clear_cuda_cache()
