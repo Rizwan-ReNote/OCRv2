@@ -466,6 +466,7 @@ import gc
 import aiofiles
 from torch.cuda.amp import autocast  # For mixed precision inference
 
+# Function to clear CUDA cache
 def clear_cuda_cache():
     """
     Clears the CUDA cache to prevent memory leaks.
@@ -482,13 +483,10 @@ app = FastAPI()
 # Disable gradient computation globally
 torch.set_grad_enabled(False)
 
-
-
 # Load model and tokenizer once and reuse them across requests
 model = AutoModel.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
 tokenizer = AutoTokenizer.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
-
-model.eval()  # Set model to evaluation mode (no need for .to('cuda') for bitsandbytes models)
+model.eval()  # Set model to evaluation mode
 
 # Sample question for the model
 question = '''Extract the text from the provided image and return only plain text content. 
@@ -546,9 +544,9 @@ async def extract_text(image: UploadFile = File(...)):
         # Preprocess the image (resize and pad to 1344x1344)
         processed_img = preprocess_image(img)
 
-        # Prepare input messages
-        msgs.append({'role': 'user', 'content': [processed_img, question]})
+        # Prepare input message for model
         # msgs = [{'role': 'user', 'content': [processed_img, question]}]
+        msgs.append({'role': 'user', 'content': [processed_img, question]})
 
         # Mixed precision inference using AMP
         with torch.no_grad():
@@ -561,10 +559,7 @@ async def extract_text(image: UploadFile = File(...)):
 
         clear_cuda_cache()
 
-        # Free memory
-        del processed_img, img, msgs
-        clear_cuda_cache()
-
+        # Return the model's response as JSON
         return JSONResponse(content={"text": answer})
 
     except Exception as e:
