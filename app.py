@@ -251,8 +251,8 @@ model = AutoModel.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_cod
 tokenizer = AutoTokenizer.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_remote_code=True)
 
 # Move model to GPU if available
-if torch.cuda.is_available():
-    model = model.to('cuda')
+# if torch.cuda.is_available():
+#     model = model.to('cuda')
 
 model.eval()  # Set model to evaluation mode
 
