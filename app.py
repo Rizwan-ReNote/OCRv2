@@ -497,24 +497,24 @@ question = '''Extract the text from the provided image and return only plain tex
               If there is no text in the image, simply return '0' but do not miss any word in the image.
               '''
 
-# Async function to read image from uploaded file
-async def read_image(image_file: UploadFile):
-    async with aiofiles.open(image_file.filename, mode='rb') as f:
-        contents = await f.read()
-        return Image.open(BytesIO(contents)).convert('RGB')
-
-# Function to preprocess the image using torchvision for efficiency
-from torchvision import transforms
-
-# preprocess = transforms.Compose([
-#     transforms.Resize(1344),  # Resize to 1344
-#     transforms.CenterCrop(1344),  # Crop to the center
-#     transforms.ToTensor(),  # Convert to tensor
-#     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Normalize
-# ])
-
-# def preprocess_image(image: Image.Image):
-#     return preprocess(image).unsqueeze(0)  # Add batch dimension
+# Preprocessing function to resize and pad the image
+def preprocess_image(image: Image.Image, target_size=(1344, 1344)):
+    """
+    Preprocess the image by resizing and padding it to the target size (1344x1344).
+    Ensures consistent padding and size for all images.
+    """
+    # Resize the image while maintaining aspect ratio
+    image.thumbnail(target_size, Image.Resampling.LANCZOS)
+    
+    # Calculate padding to match the target size
+    delta_width = target_size[0] - image.size[0]
+    delta_height = target_size[1] - image.size[1]
+    padding = (delta_width // 2, delta_height // 2, delta_width - delta_width // 2, delta_height - delta_height // 2)
+    
+    # Add padding to the image (fill with white color)
+    padded_image = ImageOps.expand(image, padding, fill=(255, 255, 255))  # Using white padding
+    
+    return padded_image
 
 @app.post("/OCR")
 async def extract_text(image: UploadFile = File(...)):
@@ -529,11 +529,8 @@ async def extract_text(image: UploadFile = File(...)):
         image_bytes = await image.read()
         img = Image.open(BytesIO(image_bytes)).convert('RGB')
 
-        # Preprocess the image
-        processed_img = img
-
-        # Move image to CPU memory if needed
-        processed_img = processed_img.cpu()
+        # Preprocess the image (resize and pad to 1344x1344)
+        processed_img = preprocess_image(img)
 
         # Prepare input messages
         msgs = [{'role': 'user', 'content': [processed_img, question]}]
