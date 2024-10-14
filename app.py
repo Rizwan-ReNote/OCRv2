@@ -258,7 +258,7 @@ if torch.cuda.is_available():
 model.eval()  # Set model to evaluation mode
 
 # Sample question
-question = '''Extract the text from the provided image and return only plain text content. 
+question = '''Extract the text from the provided image and return only plain text content you dont generate any tages such as title, subtitle if its not present in the image. 
               Ensure that no additional formatting, metadata, or fields like title, subtitles, or table headers are included in the response. 
               Provide only the actual text from the image without explaining about the image or text in the response. 
               Do not autocorrect the text and do not insert extra characters to the words and do not apply contraction to the words. 
