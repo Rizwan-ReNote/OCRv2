@@ -151,7 +151,7 @@ def clear_cuda_cache():
 def clean_text(text):
     # List of terms to be removed
     removable_terms = [
-        '**Title:**', '**Body Text:**', 'Title:', 'Body Text:',  # Add more terms as needed
+        '**Title:**', '**Body Text:**', 'Title:', 'Body Text:', '**Sub**', '**Subsection**' , '**Signature:**' # Add more terms as needed
     ]
     
     # Iterate over each term and replace it with an empty string
