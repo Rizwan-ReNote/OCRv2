@@ -5,7 +5,8 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from io import BytesIO
 import uvicorn
-import gc  # Garbage collection
+import gc  
+import re
 
 def clear_cuda_cache():
     """
@@ -14,15 +15,29 @@ def clear_cuda_cache():
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
-        gc.collect()  # Clear Python garbage
+        gc.collect()  
         print("CUDA cache cleared")
+        
+def clean_text(text):
+    # List of terms to be removed
+    removable_terms = [
+        '**Title:**', '**Body Text:**', 'Title:', 'Body Text:',  # Add more terms as needed
+    ]
+    
+    # Iterate over each term and replace it with an empty string
+    for term in removable_terms:
+        # Regex pattern to match the exact term possibly surrounded by whitespace
+        pattern = r'\s*' + re.escape(term) + r'\s*'
+        text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+    
+    return text
 
 
 
-# Initialize FastAPI app
+
 app = FastAPI()
 
-# Disable gradient computation globally
+
 torch.set_grad_enabled(False)
 
 # Load model and tokenizer
@@ -33,9 +48,9 @@ tokenizer = AutoTokenizer.from_pretrained('openbmb/MiniCPM-V-2_6-int4', trust_re
 # if torch.cuda.is_available():
 #     model = model.to('cuda')
 
-model.eval()  # Set model to evaluation mode
+model.eval() 
 
-# Sample question
+
 question = '''Extract the text from the provided image and return only plain text content. 
               Ensure that no additional formatting, metadata, or fields like title, subtitles, or table headers are included in the response. 
               Provide only the actual text from the image without explaining about the image or text in the response. 
@@ -62,23 +77,18 @@ def preprocess_image(image: Image.Image, target_size=(1344, 1344)):
     Preprocess the image by resizing and padding it to the target size (1344x1344).
     Ensures consistent padding and size for all images.
     """
-    # Resize the image while maintaining aspect ratio
     image.thumbnail(target_size, Image.Resampling.LANCZOS)
-    
-    # Calculate padding to match the target size
     delta_width = target_size[0] - image.size[0]
     delta_height = target_size[1] - image.size[1]
     padding = (delta_width // 2, delta_height // 2, delta_width - delta_width // 2, delta_height - delta_height // 2)
-    
-    # Add padding to the image (fill with white color)
-    padded_image = ImageOps.expand(image, padding, fill=(255, 255, 255))  # Using white padding
+    padded_image = ImageOps.expand(image, padding, fill=(255, 255, 255)) 
     
     return padded_image
 
 
 @app.post("/OCR")
 async def extract_text(image: UploadFile = File(...)):
-    # Check file type
+    
     if not image.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
 
@@ -89,25 +99,24 @@ async def extract_text(image: UploadFile = File(...)):
         image_bytes = await image.read()
         img = Image.open(BytesIO(image_bytes)).convert('RGB')
 
-        # Preprocess the image to the required size (1344x1344) with padding
+
         processed_img = preprocess_image(img, target_size=(1344, 1344))
 
-        # Initialize context for each request to avoid cross-request contamination
+
         msgs.append({'role': 'user', 'content': [processed_img, question]})
         # msgs = [{'role': 'user', 'content': [processed_img, question]}]
         clear_cuda_cache()
-        # Detach the model's history or state (important for certain models)
-        # Run inference using the model
         answer = model.chat(
             image=None,
             msgs=msgs,
-            tokenizer=tokenizer
+            tokenizer=tokenizer,
+            temperature=0.1
         )
 
-        # Clear CUDA cache and garbage collector after inference
-        clear_cuda_cache()
 
-        # Return the result as JSON
+        clear_cuda_cache()
+        answer = clean_text(answer)
+
         return JSONResponse(content={"text": answer})
 
     except Exception as e:
@@ -116,4 +125,4 @@ async def extract_text(image: UploadFile = File(...)):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)  # Limit workers to 1 to avoid multi-process issues
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
