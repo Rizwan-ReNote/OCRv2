@@ -101,7 +101,8 @@ async def extract_text(image: UploadFile = File(...)):
         answer = model.chat(
             image=None,
             msgs=msgs,
-            tokenizer=tokenizer
+            tokenizer=tokenizer,
+            temperature= 0.1  # Adjust the temperature for more or less randomness in the output
         )
 
         # Clear CUDA cache and garbage collector after inference
